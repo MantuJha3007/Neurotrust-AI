@@ -230,7 +230,7 @@ export default function AgentPage() {
         />
 
         <ConfidenceMeter
-          confidence={agent.confidence}
+          value={agent.confidence}
         />
 
         <RiskPanel

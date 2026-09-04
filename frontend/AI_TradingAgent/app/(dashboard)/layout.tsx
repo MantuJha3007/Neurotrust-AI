@@ -46,6 +46,19 @@ const NAVIGATION: NavigationItem[] = [
   },
 ];
 
+const SYSTEM_NAVIGATION: NavigationItem[] = [
+  {
+    href: "/risk",
+    label: "Risk Controls",
+    icon: ShieldCheck,
+  },
+  {
+    href: "/settings",
+    label: "Settings",
+    icon: Settings2,
+  },
+];
+
 function isActivePath(pathname: string, href: string): boolean {
   if (href === "/dashboard") {
     return pathname === "/dashboard";
@@ -96,6 +109,31 @@ export default function DashboardLayout({
         <div className="fixed inset-x-0 top-14 z-30 border-b border-slate-800 bg-slate-950 px-3 py-3 lg:hidden">
           <nav className="space-y-1">
             {NAVIGATION.map((item) => {
+              const Icon = item.icon;
+              const active = isActivePath(pathname, item.href);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-medium transition-colors ${
+                    active
+                      ? "bg-amber-500/10 text-amber-400"
+                      : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
+
+            <div className="pt-2 pb-1 px-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-700">
+              System
+            </div>
+
+            {SYSTEM_NAVIGATION.map((item) => {
               const Icon = item.icon;
               const active = isActivePath(pathname, item.href);
 
@@ -185,21 +223,38 @@ export default function DashboardLayout({
             </div>
 
             <div className="space-y-1">
-              <button
-                type="button"
-                className="flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left text-slate-500 transition-colors hover:bg-slate-900 hover:text-slate-300"
-              >
-                <ShieldCheck className="h-4 w-4 text-slate-600" />
-                <span className="text-xs font-medium">Risk Controls</span>
-              </button>
+              {SYSTEM_NAVIGATION.map((item) => {
+                const Icon = item.icon;
+                const active = isActivePath(pathname, item.href);
 
-              <button
-                type="button"
-                className="flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left text-slate-500 transition-colors hover:bg-slate-900 hover:text-slate-300"
-              >
-                <Settings2 className="h-4 w-4 text-slate-600" />
-                <span className="text-xs font-medium">Settings</span>
-              </button>
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`group flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors ${
+                      active
+                        ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
+                        : "border-transparent text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                    }`}
+                  >
+                    <Icon
+                      className={`h-4 w-4 ${
+                        active
+                          ? "text-amber-400"
+                          : "text-slate-600 group-hover:text-slate-400"
+                      }`}
+                    />
+
+                    <span className="text-xs font-medium">
+                      {item.label}
+                    </span>
+
+                    {active && (
+                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-amber-400" />
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           </nav>
 

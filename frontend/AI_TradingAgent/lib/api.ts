@@ -826,3 +826,36 @@ export async function getOptionContract(
     )}`,
   );
 }
+
+export interface SystemStatus {
+  status: string;
+  system: string;
+  version: string;
+  environment: string;
+  trading_mode: string;
+  broker_connected: boolean;
+  ai_engine_connected: boolean;
+  agent_status: string;
+  active_model: string;
+  data_feed: string;
+}
+
+export async function getSystemStatus(): Promise<SystemStatus> {
+  if (USE_MOCK_DATA) {
+    await delay(150);
+    return {
+      status: "ONLINE",
+      system: "NeuroTrust Autonomous AI Options Trading Gateway",
+      version: "1.0.0",
+      environment: "development",
+      trading_mode: "paper",
+      broker_connected: true,
+      ai_engine_connected: true,
+      agent_status: "active",
+      active_model: "openai/gpt-oss-120b",
+      data_feed: "iex",
+    };
+  }
+
+  return apiClient.get<SystemStatus>("/system/status");
+}

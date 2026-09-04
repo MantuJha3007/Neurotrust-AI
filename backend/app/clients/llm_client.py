@@ -76,6 +76,9 @@ class LLMClient:
     async def get_execution_events(self) -> list[dict[str, Any]]:
         return await self._get("/api/execution/events")
 
+    async def get_health(self) -> dict[str, Any]:
+        return await self._get("/api/health")
+
     # Streaming proxy generator for SSE
     async def stream_sse(self, path: str) -> AsyncGenerator[str, None]:
         url = f"{self.base_url}{path}"

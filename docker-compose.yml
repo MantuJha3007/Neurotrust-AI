@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+  llm_service:
+    build:
+      context: ./ai-trading-llm-/llm_service
+      dockerfile: Dockerfile
+    container_name: neurotrust_llm_service
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8001
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_PRIMARY_MODEL=${GROQ_PRIMARY_MODEL:-openai/gpt-oss-120b}
+      - GROQ_FALLBACK_MODELS=${GROQ_FALLBACK_MODELS:-qwen/qwen3.8-27b,openai/gpt-oss-20b}
+      - ALPACA_API_KEY=${ALPACA_API_KEY}
+      - ALPACA_SECRET_KEY=${ALPACA_SECRET_KEY}
+      - ALPACA_PAPER=${ALPACA_PAPER:-true}
+      - ALPACA_DATA_FEED=${ALPACA_DATA_FEED:-iex}
+      - SQLITE_PATH=/app/data/trading_agent.db
+    volumes:
+      - llm_data:/app/data
+    networks:
+      - neurotrust_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: neurotrust_backend_gateway
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - LLM_SERVICE_URL=http://llm_service:8001
+      - ALPACA_API_KEY=${ALPACA_API_KEY}
+      - ALPACA_SECRET_KEY=${ALPACA_SECRET_KEY}
+      - ALPACA_PAPER_BASE_URL=https://paper-api.alpaca.markets
+      - ALPACA_DATA_BASE_URL=https://data.alpaca.markets
+      - MAX_ORDER_VALUE=${MAX_ORDER_VALUE:-5000.0}
+      - MAX_POSITION_SIZE=${MAX_POSITION_SIZE:-10000.0}
+    depends_on:
+      - llm_service
+    networks:
+      - neurotrust_net
+
+  frontend:
+    build:
+      context: ./frontend/AI_TradingAgent
+      dockerfile: Dockerfile
+    container_name: neurotrust_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
+      - NEXT_PUBLIC_USE_MOCK_DATA=false
+    depends_on:
+      - backend
+    networks:
+      - neurotrust_net
+
+volumes:
+  llm_data:
+    driver: local
+
+networks:
+  neurotrust_net:
+    driver: bridge

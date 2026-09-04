@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class AgentStatus(str, Enum):
@@ -217,12 +217,11 @@ class OrderRequest(BaseModel):
     time_in_force: Literal["day", "gtc"] = "day"
     price: float | None = Field(default=None, gt=0)
 
-    @field_validator("price")
-    @classmethod
-    def limit_requires_price(cls, value: float | None, info: Any) -> float | None:
-        if info.data.get("order_type") == "limit" and value is None:
+    @model_validator(mode="after")
+    def limit_requires_price(self) -> "OrderRequest":
+        if self.order_type == "limit" and self.price is None:
             raise ValueError("price is required for limit orders")
-        return value
+        return self
 
 
 class OrderResponse(BaseModel):

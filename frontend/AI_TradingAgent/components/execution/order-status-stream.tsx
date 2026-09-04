@@ -125,7 +125,7 @@ function getStatusConfig(status: ExecutionEvent["status"]) {
 
     default:
       return {
-        label: status.toUpperCase(),
+        label: String(status).toUpperCase(),
         className: "border-slate-500/30 bg-slate-500/10 text-slate-400",
         icon: Clock3,
       };
